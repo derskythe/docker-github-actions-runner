@@ -57,18 +57,23 @@ runs:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         UPDATE_COUNTER: ${{ inputs.deps_update_counter }}
         NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+        BRANCH_NAME: update/deps-${{ inputs.deps_update_counter }}
       shell: bash
       # outputs:
       #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
       #   update_counter: ${{ steps.run-check-for-updates.outputs.update_counter }}
       run: |
+        git pull
         date > generated.txt
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git checkout -b "update/deps-$UPDATE_COUNTER"
+        git checkout -b ${{ env.BRANCH_NAME }}
         git add .
         git commit -m "Dependencies auto update"
+        git push --set-upstream origin ${{ env.BRANCH_NAME }}
         git push
+        DEFAULT_BRANCH=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+        gh pr create --label ci/di --assignee @me --base $DEFAULT_BRANCH --fill
         echo "update_counter=$(($UPDATE_COUNTER + 1))" >> "$GITHUB_OUTPUT"
         echo "latest_gh_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
