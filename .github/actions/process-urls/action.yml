@@ -57,23 +57,28 @@ runs:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         UPDATE_COUNTER: ${{ inputs.deps_update_counter }}
         NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+        BRANCH_NAME: update/deps-${{ inputs.deps_update_counter }}
+        LOG_VERSION: ${{ steps.run-check-for-updates.outputs.log_version }}
       shell: bash
       # outputs:
       #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
       #   update_counter: ${{ steps.run-check-for-updates.outputs.update_counter }}
       run: |
+        echo "update_counter=$(($UPDATE_COUNTER + 1))" >> "$GITHUB_OUTPUT"
+        echo "latest_gh_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
         date > generated.txt
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git checkout -b "update/deps-$UPDATE_COUNTER"
+        git checkout -b ${{ env.BRANCH_NAME }}
         git add .
         git commit -m "Dependencies auto update"
+        git push --set-upstream origin '${{ env.BRANCH_NAME }}'
         git push
-        echo "update_counter=$(($UPDATE_COUNTER + 1))" >> "$GITHUB_OUTPUT"
-        echo "latest_gh_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+        DEFAULT_BRANCH=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+        echo $LOG_VERSION | tr -s ';' "\n" > gh pr create --label 'ci/di' --assignee @me --base "$DEFAULT_BRANCH" --title "Update deps #$UPDATE_COUNTER" --body-file -
 
     - name: Dependencies was updated
-      if: ${{ steps.commit-if-updated.conclusion == 'success' && steps.run-check-for-updates.outputs.update_counter > inputs.deps_update_counter }}
+      if: ${{ steps.commit-if-updated.outputs.update_counter > inputs.deps_update_counter }}
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         DEPS_UPDATE_COUNTER: ${{ steps.run-check-for-updates.outputs.update_counter }}
@@ -82,7 +87,7 @@ runs:
         gh variable set DEPS_UPDATE_COUNTER -b ${{ env.DEPS_UPDATE_COUNTER }} -R ${{ github.repository }}
 
     - name: GitHub runner version was updated
-      if: ${{ steps.commit-if-updated.conclusion == 'success' && steps.run-check-for-updates.outputs.gh_runner_new_version != inputs.gh_version }}
+      if: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version != inputs.gh_version }}
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         GH_RUNNER_NEW_VERSION: ${{ steps.commit-if-updated.outputs.gh_runner_new_version }}
