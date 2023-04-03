@@ -1,84 +1,84 @@
-﻿{
-  "aws-cli": {
-    "process": "tags",
-    "src-url-from": "replace",
+{
+  "pwsh": {
     "install": "binary",
-    "archive": "zip",
-    "arm64": "aarch64",
-    "amd64": "x86_64",
-    "url": "https://github.com/aws/aws-cli/",
-    "url-src": "https://awscli.amazonaws.com/awscli-exe-linux-{REPLACE}.zip",
-    "version": "2.10.8"
+    "version": "7.3.3",
+    "url": "https://github.com/PowerShell/PowerShell/releases",
+    "process": "release",
+    "archive": "tar.gz",
+    "src-url-from": "url",
+    "amd64": "x64"
   },
   "docker": {
-    "process": "release",
-    "src-url-from": "url-src",
     "install": "script",
-    "archive": "sh",
+    "version": "23.0.2",
     "url": "https://github.com/moby/moby/releases",
-    "url-src": "https://raw.githubusercontent.com/docker/docker-install/master/install.sh",
-    "version": "20.10"
-  },
-  "dotnet": {
-    "process": "tags",
-    "src-url-from": "url-src",
-    "install": "script",
-    "archive": "sh",
-    "max-version": "7.0",
-    "url": "https://github.com/dotnet/sdk/releases",
-    "url-src": "https://dot.net/v1/dotnet-install.sh",
-    "version": "7.0.0"
-  },
-  "gh-cli": {
     "process": "release",
-    "src-url-from": "url",
-    "install": "binary",
-    "archive": "tar.gz",
-    "url": "https://github.com/cli/cli/releases",
-    "version": "2.25.1"
+    "url-src": "https://raw.githubusercontent.com/docker/docker-install/master/install.sh",
+    "archive": "sh",
+    "src-url-from": "url-src"
   },
   "gh-runner": {
-    "process": "release",
-    "src-url-from": "url",
     "install": "binary",
-    "archive": "noexternals.tar.gz",
-    "amd64": "x64",
+    "version": "2.303.0",
     "url": "https://github.com/actions/runner/releases",
-    "version": "2.303.0"
-  },
-  "git": {
-    "process": "tags",
-    "src-url-from": "url",
-    "install": "make",
-    "archive": "git",
-    "url": "https://github.com/git/git.git",
-    "version": "2.39.0"
-  },
-  "git-lfs": {
     "process": "release",
+    "archive": "noexternals.tar.gz",
     "src-url-from": "url",
-    "install": "binary",
-    "archive": "tar.gz",
-    "url": "https://github.com/git-lfs/git-lfs/releases",
-    "version": "3.3.0"
+    "amd64": "x64"
+  },
+  "dotnet": {
+    "max-version": "7.0",
+    "install": "script",
+    "version": "7.0.202",
+    "url": "https://github.com/dotnet/sdk/releases",
+    "process": "tags",
+    "url-src": "https://dot.net/v1/dotnet-install.sh",
+    "archive": "sh",
+    "src-url-from": "url-src"
   },
   "nodejs": {
-    "process": "nodejs",
-    "src-url-from": "url",
-    "install": "binary",
-    "amd64": "x64",
-    "archive": "tar.gz",
     "max-version": "16",
-    "url": "https://nodejs.org/download/release/latest-v16.x",
-    "version": "16.20.0"
-  },
-  "pwsh": {
-    "process": "release",
-    "src-url-from": "url",
     "install": "binary",
-    "amd64": "x64",
+    "version": "16.20.0",
+    "url": "https://nodejs.org/download/release/latest-v16.x",
+    "process": "nodejs",
     "archive": "tar.gz",
-    "url": "https://github.com/PowerShell/PowerShell/releases",
-    "version": "7.3.3"
+    "src-url-from": "url",
+    "amd64": "x64"
+  },
+  "aws-cli": {
+    "url-src": "https://awscli.amazonaws.com/awscli-exe-linux-{REPLACE}.zip",
+    "install": "binary",
+    "url": "https://github.com/aws/aws-cli/",
+    "process": "tags",
+    "amd64": "x86_64",
+    "src-url-from": "replace",
+    "arm64": "aarch64",
+    "version": "2.11.8",
+    "archive": "zip"
+  },
+  "git": {
+    "archive": "git",
+    "process": "tags",
+    "version": "2.40.0",
+    "url": "https://github.com/git/git.git",
+    "install": "make",
+    "src-url-from": "url"
+  },
+  "git-lfs": {
+    "archive": "tar.gz",
+    "process": "release",
+    "version": "3.3.0",
+    "url": "https://github.com/git-lfs/git-lfs/releases",
+    "install": "binary",
+    "src-url-from": "url"
+  },
+  "gh-cli": {
+    "archive": "tar.gz",
+    "process": "release",
+    "version": "2.25.1",
+    "url": "https://github.com/cli/cli/releases",
+    "install": "binary",
+    "src-url-from": "url"
   }
 }
