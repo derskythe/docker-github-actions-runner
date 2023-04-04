@@ -1,0 +1,12 @@
+{
+    "name": "Builder of Docker containers Workflow",
+    "description": "Build containers and upload it to Docker/GitHub registry",
+    "iconName": "layers",
+    "categories": [
+        "Docker"
+    ],
+    "filePatterns": [
+        "^Dockerfile",
+        ".*\\.md$"
+    ]
+}

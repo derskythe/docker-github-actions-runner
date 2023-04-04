@@ -1,5 +1,5 @@
 name: "Check for updates"
-run-name: "Check for updates ${{ github.ref_name }} by ${{ github.event_name }}"
+run-name: "Check for updates «${{ github.ref_name }}» λ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:

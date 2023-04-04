@@ -1,13 +1,12 @@
 name: "BASE build"
-run-name: "Build BASE ${{ github.ref_name }} by ${{ github.event_name }}"
-
+run-name: "Build BASE «${{ github.ref_name }}» λ${{ github.event_name }}"
+# This YAML is obsolete
+# TODO: Remove this
 on:
   workflow_dispatch:
   push:
     branches: dotnet
     paths:
-      - Dockerfile.base
-      - Dockerfile.base-slim
       - .github/workflows/build-base.yml
   schedule:
     - cron: "0 */6 * * *"

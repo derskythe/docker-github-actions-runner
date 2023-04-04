@@ -1,5 +1,5 @@
 name: "Action Runner Image build"
-run-name: "Action Runner Image build ${{ github.ref_name }} by ${{ github.event_name }}"
+run-name: "Action Runner Image build «${{ github.ref_name }}» λ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:
