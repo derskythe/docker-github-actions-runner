@@ -1,0 +1,99 @@
+---
+name: "Process URL list of dependencies"
+description: "Process URL list of dependencies and make env files if necessary"
+author: "DerSkythe"
+branding:
+  icon: 'flag'
+  color: 'yellow'
+
+inputs:
+  config_file:
+    description: 'Path to JSON'
+    required: true
+  output_prefix:
+    description: 'Directory to save env files'
+    required: true
+  platforms:
+    description: 'List of required platforms'
+    required: true
+  gh_version:
+    description: 'Version of GitHub Action Runner'
+    required: true
+  gh_token:
+    description: 'Secret token of GitHub account'
+    required: true
+outputs:
+    version:
+      description: "Latest version of GitHub Action Runner"
+      value: ${{ steps.prepare-for-output.outputs.version }}
+runs:
+  using: composite
+  steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Check deps for update
+      id: run-check-for-updates
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        CONFIG_FILE: ${{ inputs.config_file }}
+        OUTPUT_PREFIX: ${{ inputs.output_prefix }}
+        PLATFORMS: ${{ inputs.platforms }}
+      run: |
+        ./.github/helpers/process-urls.ps1 -JsonFile ${{ env.CONFIG_FILE }} -OutputPrefix ${{ env.OUTPUT_PREFIX }} -Platforms ${{ env.PLATFORMS }} | %{ Write-Host $_ Write-Output($_) >> $Env:GITHUB_OUTPUT }
+
+    - name: Commit if updated
+      id: commit-if-updated
+      if: ${{ success() && steps.run-check-for-updates.outputs.files_changed == 1 }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+        LOG_VERSION: ${{ steps.run-check-for-updates.outputs.log_version }}
+        FILES_CHANGED: ${{ steps.run-check-for-updates.outputs.files_changed }}
+      shell: pwsh
+      run: |
+        $CurrentBranch = (git branch --no-color --no-column --show-current)
+        git pull
+        $Listed = (git branch -ar --no-color --no-column --list '*update/deps-*')
+        Write-Host $Listed
+        $LastBranchNumber = $Listed | % {($_ -replace '[^\d]', '') -as [int]} | Sort-Object -Descending | Select-Object -Index 0
+        Write-Host $LastBranchNumber
+        $LastBranchNumber = $LastBranchNumber -gt 0 ? $LastBranchNumber + 1 : 1
+        Write-Host $LastBranchNumber
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        $BranchName = "update/deps-$($LastBranchNumber)"
+        git checkout -b $BranchName
+        git add .
+        $Body = "list of updates:`n"
+        $Body = $Body + ('{0}' -f ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
+        Write-Output($Body) | Out-File pr.txt
+        git commit --file=pr.txt
+        git push --set-upstream origin $BranchName
+        if ($?) {
+          $BranchName = ('{0}' -f $BranchName)
+          $CurrentBranch = ('{0}' -f $CurrentBranch)
+          gh pr create --head "$BranchName" --base "$CurrentBranch" --label 'ci/cd' --title "Update deps" -F pr.txt --repo ${{ github.repository }}
+        }
+        Remove-Item -Force pr.txt
+#          $DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+#          Write-Host ('CurrentBranch: {0}, DefaultBranch: {1}' -f $CurrentBranch, $DefaultBranch)
+#          gh api --method POST -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" '/repos/${{ github.github.repository }}/pulls' `
+#            -f title='Update deps' -f body='Please pull these awesome changes in!' `
+#            -f head="${{ github.repository_owner }}:$BranchName" -f head_repo="${{ github.repository_owner }}" `
+#            -f base="$CurrentBranch"
+
+    - name: Dependencies was updated
+      id: prepare-for-output
+      if: ${{ always() && steps.run-check-for-updates.outputs.files_changed == 1 }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+        CURRENT_VERSION: ${{ inputs.gh_version }}
+      shell: pwsh
+      run: |
+        $NewVersion = (([string]::IsNullOrWhitespace($env:NEW_VERSION)) ? $env:CURRENT_VERSION : $env:NEW_VERSION)
+        Write-Output "version=$NewVersion" >> $env:GITHUB_OUTPUT
