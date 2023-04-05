@@ -8,11 +8,6 @@ on:
     paths:
       - Dockerfile*
       - .github/workflows/build-base-all-included.yml
-#  schedule:
-#    - cron: "0 */6 * * *"
-#    branches:
-#      - master
-#      - develop
 
 concurrency:
   group: all-included-base-build
@@ -22,98 +17,111 @@ env:
   GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
 
 jobs:
-  base-make:
+  pre-build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
-        include:
-          - os: ubuntu-jammy
-            distro: ubuntu
-            codename: jammy
-            docker-codename: jammy
-            distro-version: 22.04
-          - os: ubuntu-focal
-            distro: ubuntu
-            codename: focal
-            docker-codename: focal
-            distro-version: 20.04
-          - os: ubuntu-bionic
-            distro: ubuntu
-            codename: bionic
-            docker-codename: bionic
-            distro-version: 18.04
-          - os: debian-bullseye
-            distro: debian
-            codename: bullseye
-            docker-codename: bullseye
-            distro-version: 11
-          - os: debian-sid
-            distro: debian
-            codename: sid
-            docker-codename: bullseye
-            distro-version: 10
     environment:
       name: AllIncluded
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
+      BASE_IMAGE_SUFFIX: ${{ vars.BASE_IMAGE_SUFFIX }}
+      IMAGE_TAG_PREFIX: ${{ vars.image_tag_prefix }}
       CHOWN_USER: ${{ vars.CHOWN_USER }}
-      BASE_IMAGE_NAME: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
-      RELEASE_IMAGE_NAME: ${{ format ('{0}-{1}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX) }}
-      BASE_BUILD_IMAGE: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
-      TAG_PREFIX: ${{ format('{0}-{1}', vars.IMAGE_TAG_PREFIX, matrix.os) }}
-      REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
-      FULL_TAG: ${{ format('{0}-{1}-{2}.{3}', vars.IMAGE_TAG_PREFIX, matrix.os, github.RUN_NUMBER, github.RUN_ATTEMPT) }}
-      REPOSITORY_OWNER: ${{ github.repository_owner }}
-      DOCKER_FILE: ${{ format('Dockerfile.{0}-{1}', vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX) }}
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+      RUN_NUMBER: ${{ github.RUN_NUMBER }}
+      RUN_ATTEMPT: ${{ github.RUN_ATTEMPT }}
       # All Dockerfiles must be in ./Dockerfiles/
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      outvar: ${{ steps.last.outputs.RELEASE_VERSION }}
+    permissions:
+      contents: write
+      packages: write
     steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@v3
+    -
+      name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set version by default
+      shell: pwsh
+      run: |
+          Write-Output 'PREFIX=${{ matrix.os }}' >> $env:GITHUB_ENV
+          Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
+          Write-Output 'FULL_TAG=${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
+          Write-Output 'BASE_BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}' >> $env:GITHUB_ENV
+          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }}-base' >> $env:GITHUB_ENV
+          if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
+          {
+            Write-Output 'DOCKERFILE=Dockerfile.base' >> $env:GITHUB_ENV
+          }
+          else
+          {
+            Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $env:GITHUB_ENV
+          }
 
-      - name: BUILD ${{ env.RELEASE_IMAGE_NAME }}
-        if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
-        uses: ./.github/actions/build-docker
-        with:
-          full_tag: ${{ env.FULL_TAG }}
-          repository_owner: ${{ env.REPOSITORY_OWNER }}
-          release_image_name: ${{ env.RELEASE_IMAGE_NAME }}
-          base_name: ${{ env.BASE_IMAGE_NAME }}
-          base_build_image: ${{ env.BASE_BUILD_IMAGE }}
-          revision: ${{ env.REVISION }}
-          tag_prefix: ${{ env.TAG_PREFIX }}
-          dockerfile: ${{ env.DOCKER_FILE }}
-          matrix_distro: ${{ matrix.distro }}
-          matrix_codename: ${{matrix.codename}}
-          matrix_version: ${{ matrix.distro-version }}
-          matrix_docker_codename: ${{ matrix.docker-codename}}
-          chown_user: ${{env.CHOWN_USER }}
-          docker_user: ${{ secrets.DOCKER_USER }}
-          docker_token: ${{ secrets.DOCKER_TOKEN }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          platforms: linux/amd64,linux/arm64
-          image_list: |
-            ${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
-            ghcr.io/${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
+  run-build-workflow:
+    concurrency:
+      group: run-build-workflow
+      cancel-in-progress: true
+    uses: derskythe/docker-github-actions-runner/.github/workflows/reusable/reusable-docker.yml@feat/change-naming
+    with:
+      env_vars: |
+        agent_dir: ${{ vars.AGENT_DIR }}
+        agent_tools_directory: ${{ vars.AGENT_TOOLS_DIRECTORY }}
+        chown_user: ${{ vars.CHOWN_USER }}
+        image_name: ${{ vars.IMAGE_NAME }}
+        base_image_suffix: ${{ vars.BASE_IMAGE_SUFFIX }}
+        image_tag_prefix: ${{ vars.IMAGE_TAG_PREFIX }}
+        run_number: ${{ github.RUN_NUMBER }}
+        run_attempt: ${{ github.RUN_ATTEMPT }}
+    
+# secrets:
+    #   token: ${{ secrets.GITHUB_TOKEN }}
+    #   docker-user: ${{ secrets.DOCKER_USER }}
+    #   docker-token: ${{ secrets.DOCKER_TOKEN }}
 
-  update-dockerhub-info:
-    runs-on: ubuntu-latest
-    needs: base-make
-    environment:
-      name: Builder
-    env:
-      REPOSITORY_OWNER: ${{ github.repository_owner }}
-    if: ${{ success() }}
-    steps:
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-          repository: ${{ github.repository }}
-          short-description: ${{ github.event.repository.description }}
-          readme-filepath: './README_BUILD.md'
+    #   - name: BUILD ${{ env.BASE_IMAGE_SUFFIX }}
+    #     if: ${{ env.IMAGE_TAG_PREFIX != '-' }}
+    #     uses: ./.github/actions/build-docker
+    #     with:
+    #       full_tag: ${{ env.FULL_TAG }}
+    #       repository_owner: ${{ env.REPOSITORY_OWNER }}
+    #       release_image_name: ${{ env.RELEASE_IMAGE_NAME }}
+    #       base_name: ${{ env.BASE_IMAGE_NAME }}
+    #       base_build_image: ${{ env.BASE_BUILD_IMAGE }}
+    #       revision: ${{ env.REVISION }}
+    #       tag_prefix: ${{ env.TAG_PREFIX }}
+    #       dockerfile: ${{ env.DOCKER_FILE }}
+    #       matrix_distro: ${{ matrix.distro }}
+    #       matrix_codename: ${{matrix.codename}}
+    #       matrix_version: ${{ matrix.distro-version }}
+    #       matrix_docker_codename: ${{ matrix.docker-codename}}
+    #       chown_user: ${{env.CHOWN_USER }}
+    #       docker_user: ${{ secrets.DOCKER_USER }}
+    #       docker_token: ${{ secrets.DOCKER_TOKEN }}
+    #       gh_token: ${{ secrets.GITHUB_TOKEN }}
+    #       platforms: linux/amd64,linux/arm64
+    #       image_list: |
+    #         ${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
+    #         ghcr.io/${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
+
+  # update-dockerhub-info:
+  #   runs-on: ubuntu-latest
+  #   needs: base-make
+  #   environment:
+  #     name: Builder
+  #   env:
+  #     REPOSITORY_OWNER: ${{ github.repository_owner }}
+  #   if: ${{ success() }}
+  #   steps:
+  #     - name: Docker Hub Description
+  #       uses: peter-evans/dockerhub-description@v3
+  #       with:
+  #         username: ${{ secrets.DOCKER_USER }}
+  #         password: ${{ secrets.DOCKER_TOKEN }}
+  #         repository: ${{ github.repository }}
+  #         short-description: ${{ github.event.repository.description }}
+  #         readme-filepath: ${{  format('./README_.md', env.BASE_IMAGE_SUFFIX) }}
 #EOF
