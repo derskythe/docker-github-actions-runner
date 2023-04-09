@@ -10,7 +10,7 @@ on:
       - Dockerfile.base-slim
       - .github/workflows/build-base.yml
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "27 * * * *"
 #    branches:
 #      - master
 #      - develop
