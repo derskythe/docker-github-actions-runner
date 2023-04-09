@@ -1,8 +1,9 @@
-name: "Create containers and deploy"
-run-name: "Build image ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+name: "Action Runner Image build"
+run-name: "Action Runner Image build ${{ github.ref_name }} by ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:
+    branches: dotnet
     paths:
       - "build-image.yml"
       - "Dockerfile"

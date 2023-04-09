@@ -1,15 +1,16 @@
 name: "BASE build"
-run-name: "BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "Build BASE ${{ github.ref_name }} by ${{ github.event_name }}"
 
 on:
   workflow_dispatch:
   push:
+    branches: dotnet
     paths:
       - Dockerfile.base
       - Dockerfile.base-slim
       - .github/workflows/build-base.yml
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "27 * * * *"
 #    branches:
 #      - master
 #      - develop
@@ -29,14 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          [
-            ubuntu-jammy,
-            ubuntu-jammy-dotnet,
-            ubuntu-focal,
-            ubuntu-bionic,
-            debian-bullseye,
-            debian-sid
-          ]
+         [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
