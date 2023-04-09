@@ -2,8 +2,9 @@
 [![Create containers and deploy](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-image.yml/badge.svg)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-image.yml)
 [![BASE build](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml/badge.svg)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/derskythe/docker-github-actions-runner/build-image.yml?logo=github&logoColor=darkgray)](https://github.com/derskythe/docker-github-actions-runner/actions) 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Check for updates](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/check-update.yml/badge.svg?event=schedule)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/check-update.yml)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?logo=docker&logoColor=white)](https://hub.docker.com/r/derskythe/github-runner/tags)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 # Docker Github Actions Runner
 
