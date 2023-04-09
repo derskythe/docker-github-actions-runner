@@ -1,29 +1,39 @@
-name: "Base DEV build"
-run-name: "Base DEV build «${{ github.ref_name }}» λ${{ github.event_name }}"
-# NOTE: Dev configuration must watch dev branch
+name: "Builder CI"
+
 on:
-  workflow_dispatch:
   push:
-    branches: dev
-    paths:
-      - Dockerfile*
-      - .github/workflows/build-base-dev.yml
-#  schedule:
-#    - cron: "0 */6 * * *"
-#    branches:
-#      - master
-#      - develop
+    branches: [ $default-branch ]
+    branches-ignore: [ 'dev', 'builder' ]
+  pull:
+    branches: [ $default-branch ]
+    branches-ignore: [ 'dev', 'builder' ]
+  workflow_dispatch:
 
 concurrency:
-  group: base-dev-build
+  group: base-builder-${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'workflow_dispatch' }}
   cancel-in-progress: true
 
 env:
   GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
+  AGENT_DIR: ${{ vars.AGENT_DIR }}
+  AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
+  CHOWN_USER: ${{ vars.CHOWN_USER }}
+  BASE_IMAGE_NAME: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
+  RELEASE_IMAGE_NAME: ${{ format ('{0}-{1}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX) }}
+  BASE_BUILD_IMAGE: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
+  TAG_PREFIX: ${{ format('{0}-{1}', vars.IMAGE_TAG_PREFIX, matrix.os) }}
+  REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
+  FULL_TAG: ${{ format('{0}-{1}-{2}.{3}', vars.IMAGE_TAG_PREFIX, matrix.os, github.RUN_NUMBER, github.RUN_ATTEMPT) }}
+  REPOSITORY_OWNER: ${{ github.repository_owner }}
+  DOCKER_FILE: ${{ format('Dockerfile.{0}-{1}', vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX) }}
+  # All Dockerfiles must be in ./Dockerfiles/
 
 jobs:
   base-make:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +66,7 @@ jobs:
             docker-codename: bullseye
             distro-version: 10
     environment:
-      name: Dev
+      name: Builder
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
@@ -103,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: base-make
     environment:
-      name: Dev
+      name: Builder
     env:
       REPOSITORY_OWNER: ${{ github.repository_owner }}
     if: ${{ success() }}

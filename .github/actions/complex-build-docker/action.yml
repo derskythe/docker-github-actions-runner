@@ -1,0 +1,108 @@
+name: 'Action complex build image'
+description: "Number of steps to build and deploy image"
+author: "DerSkythe"
+branding:
+  icon: 'layers'
+  color: 'blue'
+
+inputs:
+  gh_runner_version:
+    description: 'gh_runner_version'
+    required: true
+  agent_dir:
+    description: 'agent_dir'
+    required: true
+  agent_tools_directory:
+    description: 'agent_tools_directory'
+    required: true
+  chown_user:
+    description: 'chown_user'
+    required: true
+  image_name:
+    description: 'image_name'
+    required: true
+  base_image_suffix:
+    description: 'base_image_suffix'
+    required: true
+  image_tag_prefix:
+    description: 'image_tag_prefix'
+    required: true
+  run_number:
+    description: 'run_number'
+    required: true
+  run_attempt:
+    description: 'run_attempt'
+    required: true
+  dockerfile:
+    description: 'Dockerfile'
+    required: true
+  docker_user:
+    description: 'secret'
+    required: true
+  docker_token:
+    description: 'Secret'
+    required: true
+  gh_token:
+    description: 'Secret'
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: Set up QEMU
+    uses: docker/setup-qemu-action@v2
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v2
+  - name: Login to DockerHub
+    uses: docker/login-action@v2
+    with:
+      username: ${{ inputs.docker_user }}
+      password: ${{ inputs.docker_token }}
+  - name: Login to GitHub Container Registry
+    uses: docker/login-action@v2
+    with:
+      registry: ghcr.io
+      username: ${{ inputs.docker_user }}
+      password: ${{ inputs.gh_token }}
+  - name: Docker meta
+    id: meta
+    uses: docker/metadata-action@v4
+    with:
+      labels: |
+        org.opencontainers.image.name=${{ inputs.release_image_name }}
+        org.opencontainers.image.version=${{ inputs.full_tag }}
+        org.opencontainers.image.base.name=${{ inputs.base_build_image }}
+        org.opencontainers.image.revision=${{ inputs.revision }}
+        org.opencontainers.image.licenses=MIT
+      images: ${{ inputs.image_list }}
+      flavor: |
+        latest=false
+        prefix=
+        suffix=
+      tags: |
+        type=raw,value=${{ inputs.full_tag }},enable=true
+        type=raw,value=${{ inputs.tag_prefix }},enable=true
+
+  - name: Build and push
+    if: ${{ success() }}
+    uses: docker/build-push-action@v4
+    with:
+      context: .
+      file: ./Dockerfiles/${{ inputs.dockerfile }}
+      provenance: true
+      sbom: true
+      pull: true
+      push: true
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+      build-args: |
+        BUILD_IMAGE=${{ inputs.base_build_image }}
+        CHOWN_USER=${{ inputs.chown_user }}
+        LSB_RELEASE_CODENAME=${{ inputs.matrix_docker_codename }}
+        DOCKER_CODENAME=${{ inputs.matrix_docker_codename }}
+        DISTRO=${{ inputs.matrix_distro }}
+        DISTRO_VERSION=${{ inputs.matrix_version }}
+        VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
+        REVISION=${{ inputs.revision }}
+      platforms: ${{ inputs.platforms }}
+      cache-from: type=gha
+      cache-to: type=gha,mode=max

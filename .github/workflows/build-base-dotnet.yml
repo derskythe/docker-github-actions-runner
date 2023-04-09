@@ -1,6 +1,6 @@
-name: "Base DEV build"
-run-name: "Base DEV build «${{ github.ref_name }}» λ${{ github.event_name }}"
-# NOTE: Dev configuration must watch dev branch
+name: "DEV BASE build"
+run-name: "Build DEV-BASE «${{ github.ref_name }}» λ${{ github.event_name }}"
+# TODO: MUST BE RENAMED TO BUILD IN FUTURE!
 on:
   workflow_dispatch:
   push:
@@ -15,11 +15,8 @@ on:
 #      - develop
 
 concurrency:
-  group: base-dev-build
+  group: dev-base-image-make
   cancel-in-progress: true
-
-env:
-  GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
 
 jobs:
   base-make:
@@ -56,10 +53,11 @@ jobs:
             docker-codename: bullseye
             distro-version: 10
     environment:
-      name: Dev
+      name: Builder
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
+      GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
       CHOWN_USER: ${{ vars.CHOWN_USER }}
       BASE_IMAGE_NAME: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
       RELEASE_IMAGE_NAME: ${{ format ('{0}-{1}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX) }}
@@ -103,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: base-make
     environment:
-      name: Dev
+      name: Builder
     env:
       REPOSITORY_OWNER: ${{ github.repository_owner }}
     if: ${{ success() }}

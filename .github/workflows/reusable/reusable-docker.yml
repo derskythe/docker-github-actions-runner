@@ -1,0 +1,173 @@
+name: Reusable Docker build
+on:
+  workflow_call:
+    inputs:
+      json_object:
+        required: true
+        type: string
+    secrets:
+      gh_token:
+        required: true
+      docker-user:
+        required: true
+      docker-token:
+        required: true
+
+env:
+  GH_REGISTRY: ghcr.io
+
+jobs:
+  build-n-push:
+    runs-on: ubuntu-latest
+    name: Build and push
+    strategy:
+        fail-fast: false
+        matrix:
+        os:
+            [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
+        include:
+            - os: ubuntu-jammy
+            distro: ubuntu
+            codename: jammy
+            docker_codename: jammy
+            distro_version: 22.04
+            - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
+            docker_codename: focal
+            distro_version: 20.04
+            - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
+            docker_codename: bionic
+            distro_version: 18.04
+            - os: debian-bullseye
+            distro: debian
+            codename: bullseye
+            docker_codename: bullseye
+            distro_version: 11
+            - os: debian-sid
+            distro: debian
+            codename: sid
+            docker_codename: bullseye
+            distro_version: 10
+    defaults:
+      run:
+        shell: pwsh
+    permissions:
+      contents: write
+      packages: write
+    env:
+        AGENT_DIR: ''
+        AGENT_TOOLS_DIRECTORY: ''
+        CHOWN_USER: ''
+        BASE_IMAGE_NAME: ''
+        RELEASE_IMAGE_NAME: ''
+        BASE_BUILD_IMAGE: ''
+        TAG_PREFIX: ''
+        REVISION: ''
+        FULL_TAG: ''
+        REPOSITORY_OWNER: ${{ github.repository_owner }}
+        IMAGE_NAME: ''
+        BASE_IMAGE_SUFFIX: ''
+        DOCKER_FILE: ''
+        RUN_ATTEMPT: 0
+        RUN_NUMBER: 1
+        PLATFORMS: linux/amd64,linux/arm64
+        # Sent: 
+        # agent_dir
+        # agent_tools_directory
+        # chown_user
+        # image_name
+        # base_image_suffix
+        # image_tag_prefix
+        # run_number
+        # run_attempt
+    steps:
+    -
+      name: Format matrix
+      env: 
+        JSON_INPUT: ${{ fromJson(inputs.json_object) }}
+        DISTRO: ${{ matrix.distro }}
+        CODENAME: ${{ matrix.codename }}
+        DOCKER_CODENAME: ${{ matrix.docker_codename }}
+        DISTRO_VERSION: ${{ matrix.distro_version }}
+      run: |
+        $Hashmap = $env:JSON_INPUT | Convert-FromJson
+        $Hashmap.base_image_name = ('{0}:{1}' -f $env:DISTRO, $env:CODENAME)
+        $Hashmap.release_image_name = ('{0}-{1}' -f $Hashmap.image_name, $env:BASE_IMAGE_SUFFIX)
+        $Hashmap.base_build_image = ('{0}:{1}' -f $env:DISTRO, $env:CODENAME)
+        $Hashmap.tag_prefix = ('{0}-{1}-{2}' -f $Hashmap.image_tag_prefix, $env:DISTRO, $env:CODENAME)
+        $Hashmap.revision = ('{0}-{1}-{2}' -f $Hashmap.run_number, ($Hashmap.run_attempt - 1), $env:DISTRO, $env:CODENAME)
+        $Hashmap.full_tag = ('{0}-{1}-{2}-{3}.{4}' -f $Hashmap.image_tag_prefix, $env:DISTRO, $env:CODENAME, $Hashmap.run_number, ($Hashmap.run_attempt - 1))
+        $Hashmap.docker_file = ('Dockerfile.{0}-{1}' -f $Hashmap.base_image_suffix, $Hashmap.image_tag_prefix)
+        $Hashmap | %{ Write-Out ('{0}={1}' -f $_.Key.ToUpperInvariant(), $_.Value) >> $env:GITHUB_ENV }
+    -
+      name: Error if version not obtained
+      if: ${{ format('Dockerfile.{0}-{1}',  env.base_image_suffix, env.image_tag_prefix) == 'Dockerfile.-' }}
+      run: |
+        echo "::error::Release version is empty!"
+        exit 1
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secret.docker_user }}
+        password: ${{ secret.docker_token }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.GH_REGISTRY }}
+        username: ${{ secret.docker_user }}
+        password: ${{ secret.gh_token }}
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        labels: |
+          org.opencontainers.image.name=${{ env.release_image_name }}
+          org.opencontainers.image.version=${{ env.full_tag }}
+          org.opencontainers.image.base.name=${{ env.base_build_image }}
+          org.opencontainers.image.revision=${{ env.revision }}
+          org.opencontainers.image.licenses=MIT
+        images: ${{ env.image_list }}
+        flavor: |
+          latest=false
+          prefix=
+          suffix=
+        tags: |
+          type=raw,value=${{ env.full_tag }},enable=true
+          type=raw,value=${{ env.tag_prefix }},enable=true
+
+    - name: Build and push
+      if: ${{ success() }}
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ${{ env.docker_file }}
+        provenance: true
+        sbom: true
+        pull: true
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          BUILD_IMAGE=${{ env.base_build_image }}
+          CHOWN_USER=${{ env.chown_user }}
+          LSB_RELEASE_CODENAME=${{ matrix.codename }}
+          DOCKER_CODENAME=${{ matrix.docker_codename }}
+          DISTRO=${{ matrix.distro }}
+          DISTRO_VERSION=${{ matrix.distro_version }}
+          VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
+          REVISION=${{ env.revision }}
+        platforms: ${{ env.platforms }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
