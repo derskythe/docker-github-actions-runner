@@ -26,13 +26,13 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 
 ## Supported OS
 
-| Distro / Version                | Latest build status                                                                                                                                              |
-|:--------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Ubuntu           Jammy (22.04)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/ubuntu-jammy?logoColor=white&logo=ubuntu&color=darkgreen)    |
-| Ubuntu           Focal (20.04)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/ubuntu-focal?logoColor=white&logo=ubuntu&color=darkgreen)    |
-| Ubuntu           Bionic (18.04) | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/ubuntu-bionic?logoColor=white&logo=ubuntu&color=darkgreen)   |
-| Debian           Bullseye (11)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/debian-bullseye?logoColor=white&logo=debian&color=darkgreen) |
-| Debian           Sid (10)       | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/debian-sid?logoColor=white&logo=debian&color=darkgreen)      |
+| **Distro** | **Version**                | **Latest build status**                                                                                                                                              |
+|:----------:|:----------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Ubuntu     |         Jammy (22.04)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/ubuntu-jammy?logoColor=white&logo=ubuntu&color=darkgreen)    |
+| Ubuntu     |         Focal (20.04)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/ubuntu-focal?logoColor=white&logo=ubuntu&color=darkgreen)    |
+| Ubuntu     |         Bionic (18.04) | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/ubuntu-bionic?logoColor=white&logo=ubuntu&color=darkgreen)   |
+| Debian     |         Bullseye (11)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/debian-bullseye?logoColor=white&logo=debian&color=darkgreen) |
+| Debian     |         Sid (10)       | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner/debian-sid?logoColor=white&logo=debian&color=darkgreen)      |
 
 ### Supported architectures
 
