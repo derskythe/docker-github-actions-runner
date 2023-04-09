@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=ubuntu:focal
+ARG BUILD_IMAGE=ubuntu:rolling
 FROM ${BUILD_IMAGE}
 
 ARG DUMB_INIT_VERSION=1.2.2
