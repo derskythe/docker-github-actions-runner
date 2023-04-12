@@ -15,7 +15,7 @@ on:
 #      - master
 #      - develop
 concurrency:
-  group: base-image-make
+  group: base-image-make-${{ github.ref_name }}
   cancel-in-progress: true
 
 permissions:
@@ -63,6 +63,15 @@ jobs:
           #   codename: bullseye
           #   docker-codename: bullseye
           #   dockerfile: Dockerfile.base-slim
+    env:
+      RELEASE_IMAGE_NAME: ${{ vars.RELEASE_IMAGE_NAME }}
+      FULL_TAG: ''
+      BASE_BUILD_IMAGE: ''
+      LATEST_FLAG: ''
+      RELEASE_VERSION: ${{ vars.GH_RUNNER_VERSION }}
+      REVISION: '${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}'
+      DOCKERFILE: ''
+      PREFIX: ''
     steps:
       - name: Set version by default
         shell: pwsh
@@ -126,7 +135,7 @@ jobs:
           provenance: true
           sbom: true
           pull: true
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
