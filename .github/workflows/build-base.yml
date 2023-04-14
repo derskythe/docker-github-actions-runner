@@ -16,7 +16,7 @@ on:
 #      - develop
 concurrency:
   group: base-image-make-${{ github.ref_name }}
-  cancel-in-progress: true
+#  cancel-in-progress: true
 
 permissions:
   contents: write
