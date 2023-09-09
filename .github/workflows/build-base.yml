@@ -14,8 +14,8 @@ on:
 #    branches:
 #      - master
 #      - develop
-concurrency:
-  group: base-image-make-${{ github.ref_name }}
+# concurrency:
+#   group: base-image-make-${{ github.ref_name }}
 #  cancel-in-progress: true
 
 permissions:
