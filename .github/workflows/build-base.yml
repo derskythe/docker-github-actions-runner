@@ -46,10 +46,10 @@ jobs:
             distro: ubuntu
             codename: focal
             docker-codename: focal
-          - os: ubuntu-bionic
-            distro: ubuntu
-            codename: bionic
-            docker-codename: bionic
+          #- os: ubuntu-bionic
+          #  distro: ubuntu
+          #  codename: bionic
+          #  docker-codename: bionic
           - os: debian-bullseye
             distro: debian
             codename: bullseye
