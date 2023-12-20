@@ -17,7 +17,7 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 **The difference between my build is in a smaller volume and more optimization of the [build](https://github.com/derskythe/docker-github-actions-runner/actions).**  [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?label=%20&logo=docker&logoColor=white)](https://hub.docker.com/r/derskythe/github-runner/tags)
 
 **Also, I provide a security report.**
-**You can [see here](https://hub.docker.com/r/derskythe/github-runner-base/tags) the security report for the base image, additionally installed components may have vulnerabilities due to certain reasons.** [![Known Vulnerabilities](https://snyk.io/test/github/derskythe/docker-github-actions-runner/badge.svg)](https://snyk.io/test/github/derskythe/docker-github-actions-runner/badge.svg)
+**You can [see here](https://hub.docker.com/r/derskythe/github-runner-base/tags) the security report for the base image, additionally installed components may have vulnerabilities due to certain reasons.**
 
 **I'm working on optimal installation of new versions of packages without dramatically increasing the size of the image.**
 
@@ -44,12 +44,12 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 ## Tag convention
 
 For example:
-`ubuntu-bionic-2.303.0-31.1`
+`ubuntu-bionic-2.311.0-31.1`
 
 The tag consists entirely of the following parts:
 
 - `ubuntu-bionic` - distributive and version
-- `2.303.0` - version of [Actions Runner](https://github.com/actions/runner/releases)
+- `2.311.0` - version of [Actions Runner](https://github.com/actions/runner/releases)
 - `31.1` - internal build number
 
 ---
@@ -113,7 +113,7 @@ WantedBy=multi-user.target
 
 And an example of the corresponding env file that the service reads from:
 
-```bash
+```pwsh
 #sudo install -m 600 ephemeral-github-actions-runner.env /etc/
 RUNNER_SCOPE=repo
 REPO_URL=https://github.com/your-org/your-repo
@@ -308,7 +308,7 @@ spec:
 
 A runner token can be automatically acquired at runtime if `ACCESS_TOKEN` (a GitHub personal access token) is a supplied. This uses the [GitHub Actions API](https://developer.github.com/v3/actions/self_hosted_runners/#create-a-registration-token). e.g.:
 
-```Bash
+```pwsh
 docker run -d --restart always --name github-runner \
   -e ACCESS_TOKEN="footoken" \
   -e RUNNER_NAME="foo-runner" \
@@ -326,7 +326,7 @@ docker run -d --restart always --name github-runner \
 
 ### Enterprise Scope
 
-```Bash
+```pwsh
 docker run -d --restart always --name github-runner \
   -e ACCESS_TOKEN="footoken" \
   -e RUNNER_NAME="foo-runner" \
@@ -344,7 +344,7 @@ docker run -d --restart always --name github-runner \
 
 ### Org Runner
 
-```Bash
+```pwsh
 docker run -d --restart always --name github-runner \
   -e RUNNER_NAME_PREFIX="myrunner" \
   -e ACCESS_TOKEN="footoken" \
@@ -363,9 +363,9 @@ docker run -d --restart always --name github-runner \
 
 ### Per-Repo Runner
 
-```Bash
+```pwsh
 docker run -d --restart always --name github-runner \
-  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e REPO_URL="https://github.com/username/repo" \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
@@ -379,7 +379,7 @@ docker run -d --restart always --name github-runner \
 
 ### Shell Wrapper
 
-```Bash
+```pwsh
 function github-runner {
 name=github-runner-${1//\//-}
 org=$(dirname $1)
@@ -407,10 +407,10 @@ github-runner your-account/some-other-repo ARGHANOTHERGITHUBACTIONSTOKEN ubuntu-
 
 This can be propagated to all other approaches
 
-```Bash
+```pwsh
 # per repo
 docker run -d --restart always --name github-runner \
-  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e REPO_URL="https://github.com/username/repo" \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
@@ -428,7 +428,7 @@ docker run -d --restart always --name github-runner \
 
 To run the github runners behind a proxy, you need to pass the proxy parameters [required for the GitHub Runner](https://docs.github.com/en/actions/hosting-your-own-runners/using-a-proxy-server-with-self-hosted-runners) as environment variables. Note: The `http://` as prefix is required by the GitHub Runner.
 
-```bash
+```pwsh
 docker run -d --restart always --name github-runner \
   -e https_proxy="http://myproxy:3128" \
   -e http_proxy="http://myproxy:3128" \
@@ -456,7 +456,6 @@ Please note that while this runner installs and allows docker, github actions it
 For more information:
 
 - <https://github.com/actions/runner/issues/406>
-- <https://github.com/actions/runner/issues/367>
 
 Also, some GitHub Actions Workflow features, like [Job Services](https://docs.github.com/en/actions/guides/about-service-containers), won't be usable and [will result in an error](https://github.com/myoung34/docker-github-actions-runner/issues/61).
 
