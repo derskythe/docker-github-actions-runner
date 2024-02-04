@@ -5,7 +5,8 @@
 [![Check for updates](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/check-update.yml/badge.svg?event=schedule&style=plastic)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/check-update.yml)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?logo=docker&logoColor=white&style=plastic)](https://hub.docker.com/r/derskythe/github-runner/tags)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=plastic)](https://opensource.org/licenses/MIT)
-![Docker Pulls](https://img.shields.io/docker/pulls/derskythe/github-runner-base?style=plastic&logo=docker&cacheSeconds=64000&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fderskythe%2Fgithub-runner-base%2Fgeneral)
+![Docker Pulls](https://img.shields.io/docker/pulls/derskythe/github-runner?style=plastic&logo=docker&cacheSeconds=64000&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fderskythe%2Fgithub-runner)
+
 
 
 
@@ -19,6 +20,8 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 
 **The difference between my build is in a smaller volume and more optimization of the [build](https://github.com/derskythe/docker-github-actions-runner/actions).**  [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?label=%20&logo=docker&logoColor=white&style=plastic)](https://hub.docker.com/r/derskythe/github-runner/tags)
+![Docker Pulls](https://img.shields.io/docker/pulls/derskythe/github-runner?style=plastic&logo=docker&cacheSeconds=64000&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fderskythe%2Fgithub-runner)
+
 
 **Also, I provide a security report.**
 **You can [see here](https://hub.docker.com/r/derskythe/github-runner-base/tags) the security report for the base image, additionally installed components may have vulnerabilities due to certain reasons.**
