@@ -128,7 +128,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk code test --sarif > snyk-code.sarif || true
+          snyk code test --fail-on=upgradable --sarif > snyk-code.sarif || true
 
 #        # Build the docker image for testing
 #      - name: Build a Docker image
@@ -142,7 +142,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk container test --print-deps ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
+          snyk container test --print-deps --fail-on=upgradable ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
           --username=${{ secrets.DOCKER_USER }} --password=${{ secrets.DOCKER_TOKEN }} --file=${{ env.DOCKERFILE }} .
 
       - name: Container test
@@ -150,7 +150,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk container test --print-deps ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
+          snyk container test --print-deps ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --fail-on=upgradable \
           --username=${{ secrets.DOCKER_USER }} --password=${{ secrets.DOCKER_TOKEN }} --file=${{ env.DOCKERFILE }} .
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
