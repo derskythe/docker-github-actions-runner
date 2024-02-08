@@ -109,7 +109,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           labels: |
             org.opencontainers.image.name=${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
@@ -195,7 +195,7 @@ jobs:
   #         password: ${{ secrets.GITHUB_TOKEN }}
   #     - name: Docker meta
   #       id: meta
-  #       uses: docker/metadata-action@v4
+  #       uses: docker/metadata-action@v5
   #       with:
   #         labels: |
   #           org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
