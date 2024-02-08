@@ -126,7 +126,9 @@ jobs:
       - name: Snyk Code test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk code test --sarif > snyk-code.sarif || true
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk code test --sarif > snyk-code.sarif || true
 
 #        # Build the docker image for testing
 #      - name: Build a Docker image
@@ -138,26 +140,34 @@ jobs:
       - name: Container test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk container test --print-deps ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk container test --print-deps ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
           --username=${{ secrets.DOCKER_USER }} --password=${{ secrets.DOCKER_TOKEN }} --file=${{ env.DOCKERFILE }} .
 
       - name: Container test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk container test --print-deps ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk container test --print-deps ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} \
           --username=${{ secrets.DOCKER_USER }} --password=${{ secrets.DOCKER_TOKEN }} --file=${{ env.DOCKERFILE }} .
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
       - name: Snyk Container monitor
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk container monitor ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk container monitor ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
       - name: Snyk Container monitor
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk container monitor ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk container monitor ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
 
         # Push the Snyk Code results into GitHub Code Scanning tab
       - name: Upload result to GitHub Code Scanning
@@ -167,4 +177,6 @@ jobs:
 
         # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
       - name: Snyk Open Source monitor
-        run: snyk monitor --all-projects
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk monitor --all-projects
