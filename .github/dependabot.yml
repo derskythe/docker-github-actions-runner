@@ -10,8 +10,12 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      
+    assignees:
+      - "octocat"
+
   - package-ecosystem: "docker"
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    assignees:
+      - "octocat"
