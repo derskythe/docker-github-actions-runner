@@ -90,7 +90,7 @@ jobs:
             Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $env:GITHUB_ENV
           }
       - name: Copy Repo Files
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -177,7 +177,7 @@ jobs:
   #         echo "VERSION_NUMBER=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}" >> $GITHUB_ENV
   #         echo 'FULL_TAG=${{ matrix.os }}-slim-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
   #     - name: Copy Repo Files
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
   #     - name: Set up QEMU
   #       uses: docker/setup-qemu-action@v3
   #     - name: Set up Docker Buildx
