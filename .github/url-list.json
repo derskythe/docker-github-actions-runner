@@ -8,7 +8,7 @@
     "amd64": "x86_64",
     "url": "https://github.com/aws/aws-cli/",
     "url-src": "https://awscli.amazonaws.com/awscli-exe-linux-{REPLACE}.zip",
-    "version": "2.11.9"
+    "version": "2.15.19"
   },
   "docker": {
     "process": "release",
@@ -17,7 +17,7 @@
     "archive": "sh",
     "url": "https://github.com/moby/moby/releases",
     "url-src": "https://raw.githubusercontent.com/docker/docker-install/master/install.sh",
-    "version": "23.0.2"
+    "version": "25.0.3"
   },
   "dotnet": {
     "process": "tags",
@@ -27,7 +27,7 @@
     "max-version": "7.0",
     "url": "https://github.com/dotnet/sdk/releases",
     "url-src": "https://dot.net/v1/dotnet-install.sh",
-    "version": "7.0.202"
+    "version": "7.0.405"
   },
   "gh-cli": {
     "process": "release",
@@ -35,7 +35,7 @@
     "install": "binary",
     "archive": "tar.gz",
     "url": "https://github.com/cli/cli/releases",
-    "version": "2.25.1"
+    "version": "2.43.1"
   },
   "gh-runner": {
     "process": "release",
@@ -52,7 +52,7 @@
     "install": "make",
     "archive": "git",
     "url": "https://github.com/git/git.git",
-    "version": "2.40.0"
+    "version": "2.44.0"
   },
   "git-lfs": {
     "process": "release",
@@ -60,7 +60,7 @@
     "install": "binary",
     "archive": "tar.gz",
     "url": "https://github.com/git-lfs/git-lfs/releases",
-    "version": "3.2.0"
+    "version": "3.4.1"
   },
   "nodejs": {
     "process": "nodejs",
@@ -70,7 +70,7 @@
     "archive": "tar.gz",
     "max-version": "16",
     "url": "https://nodejs.org/download/release/latest-v16.x",
-    "version": "16.20.0"
+    "version": "16.20.2"
   },
   "pwsh": {
     "process": "release",
@@ -79,6 +79,6 @@
     "amd64": "x64",
     "archive": "tar.gz",
     "url": "https://github.com/PowerShell/PowerShell/releases",
-    "version": "7.3.0"
+    "version": "7.4.1"
   }
 }
