@@ -69,7 +69,7 @@ jobs:
       DOCKER_FILE: ${{ format('Dockerfile.{0}-{1}', vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX) }}
     steps:
       - name: Copy Repo Files
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: BUILD ${{ env.RELEASE_IMAGE_NAME }}
         if: ${{ env.RELEASE_IMAGE_NAME != '-' }}

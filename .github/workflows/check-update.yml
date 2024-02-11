@@ -30,7 +30,7 @@ jobs:
       CONFIG_FILE: './.github/url-list.json'
     steps:
       - name: Copy Repo Files
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Process URLs
         id: process-urls
