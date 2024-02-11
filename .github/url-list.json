@@ -41,10 +41,10 @@
     "process": "release",
     "src-url-from": "url",
     "install": "binary",
-    "archive": "noexternals.tar.gz",
+    "archive": "tar.gz",
     "amd64": "x64",
     "url": "https://github.com/actions/runner/releases",
-    "version": "2.303.0"
+    "version": "2.313.0"
   },
   "git": {
     "process": "tags",
