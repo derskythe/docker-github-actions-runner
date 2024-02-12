@@ -1,19 +1,14 @@
+
 [![GitHub last commit](https://img.shields.io/github/last-commit/derskythe/docker-github-actions-runner?logo=github&logoColor=white&style=plastic)](https://github.com/derskythe/docker-github-actions-runner)
 [![Create containers and deploy](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-image.yml/badge.svg?style=plastic)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-image.yml)
 [![BASE build](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml/badge.svg?style=plastic)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/derskythe/docker-github-actions-runner/build-image.yml?logo=github&logoColor=darkgray&style=plastic)](https://github.com/derskythe/docker-github-actions-runner/actions) 
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/derskythe/docker-github-actions-runner/build-image.yml?logo=github&logoColor=darkgray&style=plastic)](https://github.com/derskythe/docker-github-actions-runner/actions)
 [![Check for updates](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/check-update.yml/badge.svg?event=schedule&style=plastic)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/check-update.yml)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?logo=docker&logoColor=white&style=plastic)](https://hub.docker.com/r/derskythe/github-runner/tags)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=plastic)](https://opensource.org/licenses/MIT)
 ![Docker Pulls](https://img.shields.io/docker/pulls/derskythe/github-runner?style=plastic&logo=docker&cacheSeconds=64000&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fderskythe%2Fgithub-runner)
 
-
-
-
-
 # Docker Github Actions Runner
-
-
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
@@ -22,15 +17,12 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 **The difference between my build is in a smaller volume and more optimization of the [build](https://github.com/derskythe/docker-github-actions-runner/actions).**  [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?label=%20&logo=docker&logoColor=white&style=plastic)](https://hub.docker.com/r/derskythe/github-runner/tags)
 ![Docker Pulls](https://img.shields.io/docker/pulls/derskythe/github-runner?style=plastic&logo=docker&cacheSeconds=64000&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fderskythe%2Fgithub-runner)
 
-
 **Also, I provide a security report.**
 **You can [see here](https://hub.docker.com/r/derskythe/github-runner-base/tags) the security report for the base image, additionally installed components may have vulnerabilities due to certain reasons.**
 
 **I'm working on optimal installation of new versions of packages without dramatically increasing the size of the image.**
 
 ---
-
-
 
 ## Supported OS
 
@@ -181,7 +173,7 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: build packages
       run: make all
 ```
@@ -404,7 +396,7 @@ docker run -d --restart=always \
 -v /tmp/github-runner-${repo}:/tmp/github-runner-${repo} \
 --name $name derskythe/github-runner:latest
 }
-github-runner your-account/your-repo   AARGHTHISISYOURGHACTIONSTOKEN
+github-runner your-account/your-repo AARGHTHISISYOURGHACTIONSTOKEN
 github-runner your-account/some-other-repo ARGHANOTHERGITHUBACTIONSTOKEN ubuntu-focal
 ```
 
@@ -474,13 +466,6 @@ Currently runners [do not support containerd](https://github.com/actions/runner/
 
 ---
 
-## Docker-Compose on ARM
-
-Please note `docker-compose` does not currently work on ARM ([see issue](https://github.com/docker/compose/issues/6831)) so it is not installed on ARM based builds here.
-A workaround exists, please see [here](https://github.com/myoung34/docker-github-actions-runner/issues/72#issuecomment-804723656)
-
----
-
 ## Docker Artifacts
 
 | Container Base    | Supported Architectures | Tag Regex                                          | Docker Tags                                                                                                                                                                       | Description                                                                                                                                                                                      | Notes                                 |
@@ -511,7 +496,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `ORG_NAME`                            | The organization name for the runner to register under. Requires `RUNNER_SCOPE` to be 'org'. No default value.                                                                                                                                                                                                                                                                    |
 | `ENTERPRISE_NAME`                     | The enterprise name for the runner to register under. Requires `RUNNER_SCOPE` to be 'enterprise'. No default value.                                                                                                                                                                                                                                                               |
 | `LABELS`                              | A comma separated string to indicate the labels. Default is 'default'                                                                                                                                                                                                                                                                                                             |
-| `REPO_URL`                            | If using a non-organization runner this is the full repository url to register under such as 'https://github.com/myoung34/repo'                                                                                                                                                                                                                                                   |
+| `REPO_URL`                            | If using a non-organization runner this is the full repository url to register under such as `https://github.com/myoung34/repo`                                                                                                                                                                                                                                                   |
 | `RUNNER_TOKEN`                        | If not using a PAT for `ACCESS_TOKEN` this will be the runner token provided by the Add Runner UI (a manual process). Note: This token is short lived and will change frequently. `ACCESS_TOKEN` is likely preferred.                                                                                                                                                             |
 | `RUNNER_WORKDIR`                      | The working directory for the runner. Runners on the same host should not share this directory. Default is '/_work'. This must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files.                                                                                                                               |
 | `RUNNER_GROUP`                        | Name of the runner group to add this runner to (defaults to the default runner group)                                                                                                                                                                                                                                                                                             |

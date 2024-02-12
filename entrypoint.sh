@@ -14,7 +14,7 @@ export -n APP_PRIVATE_KEY
 deregister_runner() {
   echo "Caught SIGTERM. Unregister runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash ${RUNNER_DIR}/token.sh)
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash "${RUNNER_DIR}/token.sh")
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
@@ -96,7 +96,7 @@ configure_runner() {
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
     nl="
 "
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash ${RUNNER_DIR}/app_token.sh)
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash "${RUNNER_DIR}/app_token.sh")
   elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]] || [[ -n "${APP_LOGIN}" ]]; then
     echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
     exit 1
@@ -104,7 +104,7 @@ configure_runner() {
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash ${RUNNER_DIR}/token.sh)
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash "${RUNNER_DIR}/token.sh")
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
 
@@ -159,7 +159,7 @@ fi
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Re-usage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
   # Quoting (even with double-quotes) the regexp broke the copying
-  cp -p -r "${RUNNER_DIR}/_diag" "${RUNNER_DIR}/svc.sh" ${RUNNER_DIR}/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -p -r "${RUNNER_DIR}/_diag" "${RUNNER_DIR}/svc.sh" "${RUNNER_DIR}/.[^.]*" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
@@ -179,7 +179,7 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
 else
   if [[ $(id -u) -eq 0 ]]; then
     [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R "${CHOWN_USER}" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    /usr/bin/chown -R "${CHOWN_USER}" "${_RUNNER_WORKDIR}" ${RUNNER_DIR}
+    /usr/bin/chown -R "${CHOWN_USER}" "${_RUNNER_WORKDIR}" "${RUNNER_DIR}"
     # The tool cache is not recursively chowned to avoid recursion over populated tooling in derived docker images
     /usr/bin/chown "${CHOWN_USER}" "${CACHE_HOSTED_TOOLS_DIRECTORY}"
     /usr/sbin/gosu "${CHOWN_USER}" "$@"
