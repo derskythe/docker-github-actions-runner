@@ -2,7 +2,7 @@ ARG BASE_IMAGE="derskythe/runner-base-slim:latest"
 FROM ${BASE_IMAGE} AS base
 # hadolint ignore=DL3007
 
-ARG GH_RUNNER_VERSION='2.303.0'
+ARG GH_RUNNER_VERSION='2.313.0'
 ARG RUNNER_DIR="/actions-runner"
 ENV RUNNER_DIR=${RUNNER_DIR}
 ARG CACHE_HOSTED_TOOLS_DIRECTORY="${RUNNER_DIR}/hostedtoolcache"
@@ -13,7 +13,7 @@ ARG DISTRO
 ARG DISTRO_VERSION
 
 # SDK version
-ENV DOTNET_VERSION='6.0'
+ENV DOTNET_VERSION='7.0'
 ENV PWSH_VERSION='7.3.3'
 ENV NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages
 ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
@@ -30,7 +30,7 @@ RUN unset ASPNETCORE_URLS  \
     && (echo "export DOTNET_ROOT=/usr/share/dotnet" >> /etc/profile )  \
     && (echo "export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared" >> /etc/profile ) \
     && (echo "export DOTNET_ROOT=/usr/share/dotnet" >> ~/.bashrc )  \
-    && ( echo "export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared" >> ~/.bashrc)  \
+    && (echo "export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared" >> ~/.bashrc)  \
     && TARGET_ARCH=$(echo ${TARGETARCH} | sed 's/amd/x/' ) \
     && wget -qO- "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-$TARGET_ARCH.tar.gz" | tar xz -C /usr/share/pwsh  \
     && ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh  \
@@ -40,5 +40,4 @@ RUN unset ASPNETCORE_URLS  \
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
-
 #
