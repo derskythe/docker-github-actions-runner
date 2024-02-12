@@ -17,6 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=SC2086,DL3015,DL3008,DL3013
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update -qq \
+  && apt-get upgrade -qq -y \
   && apt-get install -y --no-install-recommends gnupg -qq \
   && apt-get update -qq \
   && apt-get install -y --no-install-recommends -qq \
