@@ -45,7 +45,7 @@ jobs:
     -
       name: Update release
       id: update-release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
 #      if: ${{ env.PUBLISH_RELEASE == 1 }}
       with:
         tag_name: ${{ env.TAG_NAME }}
