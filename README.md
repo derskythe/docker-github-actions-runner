@@ -43,12 +43,12 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 ## Tag convention
 
 For example:
-`ubuntu-bionic-2.315.0-31.1`
+`ubuntu-bionic-2.316.0-31.1`
 
 The tag consists entirely of the following parts:
 
 - `ubuntu-bionic` - distributive and version
-- `2.313.0` - version of [Actions Runner](https://github.com/actions/runner/releases)
+- `2.316.0` - version of [Actions Runner](https://github.com/actions/runner/releases)
 - `31.1` - internal build number
 
 ---
