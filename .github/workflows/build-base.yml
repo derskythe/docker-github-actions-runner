@@ -128,7 +128,7 @@ jobs:
             type=raw,value=${{ env.FULL_TAG }},enable=true
             type=raw,value=${{ env.PREFIX }},enable=true
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ env.DOCKERFILE }}
@@ -213,7 +213,7 @@ jobs:
   #         tags: |
   #           type=raw,value=${{ env.FULL_TAG }},enable=true
   #     - name: Build and push
-  #       uses: docker/build-push-action@v5
+  #       uses: docker/build-push-action@v6
   #       with:
   #         context: .
   #         file: Dockerfile.base-slim
