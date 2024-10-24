@@ -1,17 +1,18 @@
+# syntax=docker/dockerfile:1
 ARG BASE_IMAGE="derskythe/github-runner-base:latest"
 FROM ${BASE_IMAGE} AS base
 # hadolint ignore=DL3007
 
-ARG GH_RUNNER_VERSION="2.303.0"
+ARG GH_RUNNER_VERSION="2.320.0"
 ARG RUNNER_DIR="/actions-runner"
-ENV RUNNER_DIR=${RUNNER_DIR}
 ARG CACHE_HOSTED_TOOLS_DIRECTORY="${RUNNER_DIR}/hostedtoolcache"
 ARG CHOWN_USER="runner"
 ARG TARGETARCH
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ENV NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages \
+ENV RUNNER_DIR=${RUNNER_DIR} \
+    NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages \
     CACHE_HOSTED_TOOLS_DIRECTORY=${CACHE_HOSTED_TOOLS_DIRECTORY}
 
 WORKDIR ${RUNNER_DIR}

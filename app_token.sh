@@ -12,7 +12,6 @@
 set -o pipefail
 
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
-
 # If URL is not github.com then use the enterprise api endpoint
 if [[ ${GITHUB_HOST} = "github.com" ]]; then
   URI="https://api.${_GITHUB_HOST}"
@@ -25,33 +24,30 @@ API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 CONTENT_LENGTH_HEADER="Content-Length: 0"
 APP_INSTALLATIONS_URI="${URI}/app/installations"
 
-
 # JWT parameters based off
 # https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app
 #
 # JWT token issuance and expiration parameters
 JWT_IAT_DRIFT=60
 JWT_EXP_DELTA=600
-
 JWT_JOSE_HEADER='{
     "alg": "RS256",
     "typ": "JWT"
 }'
 
-
 build_jwt_payload() {
-    now=$(date +%s)
-    iat=$((now - JWT_IAT_DRIFT))
+    NOW=$(date +%s)
+    IAT=$((NOW - JWT_IAT_DRIFT))
     jq -c \
-        --arg iat_str "${iat}" \
+        --arg iat_str "${IAT}" \
         --arg exp_delta_str "${JWT_EXP_DELTA}" \
         --arg app_id_str "${APP_ID}" \
     '
-        ($iat_str | tonumber) as $iat
+        ($iat_str | tonumber) as $IAT
         | ($exp_delta_str | tonumber) as $exp_delta
         | ($app_id_str | tonumber) as $app_id
-        | .iat = $iat
-        | .exp = ($iat + $exp_delta)
+        | .IAT = $IAT
+        | .exp = ($IAT + $exp_delta)
         | .iss = $app_id
     ' <<< "{}" | tr -d '\n'
 }
@@ -65,25 +61,28 @@ rs256_sign() {
 }
 
 request_access_token() {
-    jwt_payload=$(build_jwt_payload)
-    encoded_jwt_parts=$(base64url <<<"${JWT_JOSE_HEADER}").$(base64url <<<"${jwt_payload}")
-    encoded_mac=$(echo -n "${encoded_jwt_parts}" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
-    generated_jwt="${encoded_jwt_parts}.${encoded_mac}"
+    JWT_PAYLOAD=$(build_jwt_payload)
+    ENCODED_JWT_PARTS=$(base64url <<<"${JWT_JOSE_HEADER}").$(base64url <<<"${JWT_PAYLOAD}")
+    ENCODED_MAC=$(echo -n "${ENCODED_JWT_PARTS}" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
+    GENERATED_JWT="${ENCODED_JWT_PARTS}.${ENCODED_MAC}"
 
-    auth_header="Authorization: Bearer ${generated_jwt}"
+    AUTH_HEADER="Authorization: Bearer ${GENERATED_JWT}"
 
-    app_installations_response=$(curl -sX GET \
-        -H "${auth_header}" \
+    APP_INSTALLATIONS_RESPONSE=$(curl -sX GET \
+        -H "${AUTH_HEADER}" \
         -H "${API_HEADER}" \
         "${APP_INSTALLATIONS_URI}" \
     )
-    access_token_url=$(echo "${app_installations_response}" | jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
+    ACCESS_TOKEN_URL=$(echo "${APP_INSTALLATIONS_RESPONSE}" | \
+      jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
     curl -sX POST \
         -H "${CONTENT_LENGTH_HEADER}" \
-        -H "${auth_header}" \
+        -H "${AUTH_HEADER}" \
         -H "${API_HEADER}" \
-        "${access_token_url}" | \
+        "${ACCESS_TOKEN_URL}" | \
         jq --raw-output .token
 }
 
 request_access_token
+
+exit 0

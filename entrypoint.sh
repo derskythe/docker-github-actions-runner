@@ -21,17 +21,18 @@ deregister_runner() {
   exit
 }
 
-_DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
-
+_DISABLE_AUTOMATIC_DE_REGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
 _RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:="true"}
-
-_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
+_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(
+  head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13
+  echo ''
+)}
 if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   # In some cases this file does not exist
   if [[ -f "/etc/hostname" ]]; then
     # in some cases it can also be empty
-    if [[ $(stat --printf="%s" /etc/hostname) -ne 0 ]]; then
-      _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
+    if [[ $(stat --printf="%s" "/etc/hostname") -ne 0 ]]; then
+      _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat "/etc/hostname")}
       echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting ${CHOWN_USER} name to ${_RUNNER_NAME}"
     else
       echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} ./etc/hostname exists but is empty. Not using /etc/hostname."
@@ -60,30 +61,39 @@ fi
 RUNNER_SCOPE="${RUNNER_SCOPE,,}" # to lowercase
 
 case ${RUNNER_SCOPE} in
-  org*)
-    [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
-    _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
-    RUNNER_SCOPE="org"
-    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
-      APP_LOGIN=${ORG_NAME}
-    fi
-    ;;
+org*)
+  [[ -z ${ORG_NAME} ]] && (
+    echo "ORG_NAME required for org runners"
+    exit 1
+  )
+  _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
+  RUNNER_SCOPE="org"
+  if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+    APP_LOGIN=${ORG_NAME}
+  fi
+  ;;
 
-  ent*)
-    [[ -z ${ENTERPRISE_NAME} ]] && ( echo "ENTERPRISE_NAME required for enterprise runners"; exit 1 )
-    _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
-    RUNNER_SCOPE="enterprise"
-    ;;
+ent*)
+  [[ -z ${ENTERPRISE_NAME} ]] && (
+    echo "ENTERPRISE_NAME required for enterprise runners"
+    exit 1
+  )
+  _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
+  RUNNER_SCOPE="enterprise"
+  ;;
 
-  *)
-    [[ -z ${REPO_URL} ]] && ( echo "REPO_URL required for repo runners"; exit 1 )
-    _SHORT_URL=${REPO_URL}
-    RUNNER_SCOPE="repo"
-    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
-      APP_LOGIN=${REPO_URL%/*}
-      APP_LOGIN=${APP_LOGIN##*/}
-    fi
-    ;;
+*)
+  [[ -z ${REPO_URL} ]] && (
+    echo "REPO_URL required for repo runners"
+    exit 1
+  )
+  _SHORT_URL=${REPO_URL}
+  RUNNER_SCOPE="repo"
+  if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+    APP_LOGIN=${REPO_URL%/*}
+    APP_LOGIN=${APP_LOGIN##*/}
+  fi
+  ;;
 esac
 
 configure_runner() {
@@ -94,9 +104,8 @@ configure_runner() {
       exit 1
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
-    nl="
-"
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash "${RUNNER_DIR}/app_token.sh")
+    NL="\n"
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${NL}}" APP_LOGIN="${APP_LOGIN}" /bin/bash "${RUNNER_DIR}/app_token.sh")
   elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]] || [[ -n "${APP_LOGIN}" ]]; then
     echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
     exit 1
@@ -121,20 +130,18 @@ configure_runner() {
 
   echo "Configuring"
   ./config.sh \
-      --url "${_SHORT_URL}" \
-      --token "${RUNNER_TOKEN}" \
-      --name "${_RUNNER_NAME}" \
-      --work "${_RUNNER_WORKDIR}" \
-      --labels "${_LABELS}" \
-      --runnergroup "${_RUNNER_GROUP}" \
-      --unattended \
-      --replace \
-      "${ARGS[@]}"
+    --url "${_SHORT_URL}" \
+    --token "${RUNNER_TOKEN}" \
+    --name "${_RUNNER_NAME}" \
+    --work "${_RUNNER_WORKDIR}" \
+    --labels "${_LABELS}" \
+    --runnergroup "${_RUNNER_GROUP}" \
+    --unattended \
+    --replace \
+    "${ARGS[@]}"
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
-
 }
-
 
 # Opt into runner re-usage because a value was given
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
@@ -159,15 +166,15 @@ fi
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Re-usage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
   # Quoting (even with double-quotes) the regexp broke the copying
-  cp -p -r "${RUNNER_DIR}/_diag" "${RUNNER_DIR}/svc.sh" "${RUNNER_DIR}/.[^.]*" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -p -r "${RUNNER_DIR}/_diag" "${RUNNER_DIR}/svc.sh" \
+    "${RUNNER_DIR}/.[^.]*" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
-if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
+if [[ ${_DISABLE_AUTOMATIC_DE_REGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
 # Container's command (CMD) execution as runner user
-
 
 if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
@@ -178,7 +185,8 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
-    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R "${CHOWN_USER}" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R "${CHOWN_USER}" \
+      "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
     /usr/bin/chown -R "${CHOWN_USER}" "${_RUNNER_WORKDIR}" "${RUNNER_DIR}"
     # The tool cache is not recursively chowned to avoid recursion over populated tooling in derived docker images
     /usr/bin/chown "${CHOWN_USER}" "${CACHE_HOSTED_TOOLS_DIRECTORY}"
